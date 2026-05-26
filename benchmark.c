@@ -13,6 +13,7 @@
 #include "sortlib.h"
 
 #define MAX_SECONDS 900.0
+#define RUNS        5
 
 static int compareInts(const void *a, const void *b) {
     return *(const int *)a - *(const int *)b;
@@ -20,16 +21,22 @@ static int compareInts(const void *a, const void *b) {
 
 static double measure(void (*fn)(void *, size_t, size_t, int (*)(const void *, const void *)),
                       int *src, size_t n) {
-    int *arr = malloc(n * sizeof(int));
-    memcpy(arr, src, n * sizeof(int));
+    double total = 0.0;
+    for (int r = 0; r < RUNS; r++) {
+        int *arr = malloc(n * sizeof(int));
+        memcpy(arr, src, n * sizeof(int));
 
-    struct timespec t0, t1;
-    clock_gettime(CLOCK_MONOTONIC, &t0);
-    fn(arr, n, sizeof(int), compareInts);
-    clock_gettime(CLOCK_MONOTONIC, &t1);
+        struct timespec t0, t1;
+        clock_gettime(CLOCK_MONOTONIC, &t0);
+        fn(arr, n, sizeof(int), compareInts);
+        clock_gettime(CLOCK_MONOTONIC, &t1);
 
-    free(arr);
-    return (t1.tv_sec - t0.tv_sec) + (t1.tv_nsec - t0.tv_nsec) / 1e9;
+        free(arr);
+        double t = (t1.tv_sec - t0.tv_sec) + (t1.tv_nsec - t0.tv_nsec) / 1e9;
+        total += t;
+        if (t > MAX_SECONDS) return total / (r + 1);
+    }
+    return total / RUNS;
 }
 
 int main(void) {
