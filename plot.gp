@@ -5,7 +5,7 @@ set ylabel "Time (seconds)"
 set key top left
 set logscale x 2
 
-# --- measured ---
+# --- measured (linear Y) ---
 
 set output "plots/random.png"
 set title "Random data"
@@ -22,19 +22,23 @@ set title "Sorted data (descending)"
 plot "data/insertion_reverse.dat" using 1:2 with linespoints lw 2 pt 7 lc 1 title "Insertion Sort", \
      "data/heap_reverse.dat"      using 1:2 with linespoints lw 2 pt 5 lc 2 title "Heap Sort"
 
-# --- ideal ---
+# --- ideal (log-log: прямые линии — наклон = степень сложности) ---
+
+set logscale y
 
 set output "plots/random_i.png"
-set title "Random data — ideal complexity"
+set title "Random data — ideal complexity (log-log)"
 plot "data/ideal_insertion_random.dat" using 1:2 with linespoints lw 2 pt 7 lc 1 title "O(n^2)", \
      "data/ideal_heap_random.dat"      using 1:2 with linespoints lw 2 pt 5 lc 2 title "O(n log n)"
 
 set output "plots/sorted_i.png"
-set title "Sorted data (ascending) — ideal complexity"
+set title "Sorted data (ascending) — ideal complexity (log-log)"
 plot "data/ideal_insertion_sorted.dat" using 1:2 with linespoints lw 2 pt 7 lc 1 title "O(n)", \
      "data/ideal_heap_sorted.dat"      using 1:2 with linespoints lw 2 pt 5 lc 2 title "O(n log n)"
 
 set output "plots/reverse_i.png"
-set title "Sorted data (descending) — ideal complexity"
+set title "Sorted data (descending) — ideal complexity (log-log)"
 plot "data/ideal_insertion_reverse.dat" using 1:2 with linespoints lw 2 pt 7 lc 1 title "O(n^2)", \
      "data/ideal_heap_reverse.dat"      using 1:2 with linespoints lw 2 pt 5 lc 2 title "O(n log n)"
+
+unset logscale y
