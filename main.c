@@ -22,7 +22,8 @@ static int compareAtomsByZ(const void *a, const void *b) {
 }
 
 static void printUsage(const char *prog) {
-    printf("Usage: %s [-a insertion|heap] [-n size] [-t int|atom] [-o random|sorted|reverse]\n", prog);
+    printf("Usage: %s [-a insertion|heap] [-n size] [-t int|atom] [-o random|sorted|reverse|stdin]\n", prog);
+    printf("  -o stdin  read N integers from standard input\n");
 }
 
 int main(int argc, char *argv[]) {
@@ -51,11 +52,22 @@ int main(int argc, char *argv[]) {
 
     if (strcmp(type, "int") == 0) {
         int *arr = malloc((size_t)n * sizeof(int));
-        for (int i = 0; i < n; i++) {
-            if      (strcmp(order, "sorted")  == 0) arr[i] = i;
-            else if (strcmp(order, "reverse") == 0) arr[i] = n - i;
-            else                                    arr[i] = rand() % 1000;
+        if (strcmp(order, "stdin") == 0) {
+            printf("Enter %d integers:\n", n);
+            for (int i = 0; i < n; i++) {
+                if (scanf("%d", &arr[i]) != 1) {
+                    fprintf(stderr, "Read error at position %d\n", i);
+                    free(arr); return 1;
+                }
+            }
+        } else {
+            for (int i = 0; i < n; i++) {
+                if      (strcmp(order, "sorted")  == 0) arr[i] = i;
+                else if (strcmp(order, "reverse") == 0) arr[i] = n - i;
+                else                                    arr[i] = rand() % 1000;
+            }
         }
+
         printf("Before: ");
         for (int i = 0; i < n; i++) printf("%d ", arr[i]);
         printf("\n");

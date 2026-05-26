@@ -12,6 +12,24 @@ benchmark: benchmark.c sortlib.h
 run: main
 	DYLD_LIBRARY_PATH=. ./main
 
+# Готовый показательный прогон: оба алгоритма, int + atom
+demo: main
+	@echo "=== Insertion Sort — случайные int ==="
+	DYLD_LIBRARY_PATH=. ./main -a insertion -n 12 -t int -o random
+	@echo ""
+	@echo "=== Heap Sort — случайные int ==="
+	DYLD_LIBRARY_PATH=. ./main -a heap -n 12 -t int -o random
+	@echo ""
+	@echo "=== Insertion Sort — атомы (по Z) ==="
+	DYLD_LIBRARY_PATH=. ./main -a insertion -n 8 -t atom
+
+# Ввод своих чисел: make sort N=7 ALG=heap
+# или из файла:    make sort N=5 < nums.txt
+N   ?= 10
+ALG ?= heap
+sort: main
+	DYLD_LIBRARY_PATH=. ./main -a $(ALG) -n $(N) -o stdin
+
 plots: benchmark
 	mkdir -p data plots
 	DYLD_LIBRARY_PATH=. ./benchmark
