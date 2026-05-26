@@ -1,0 +1,32 @@
+all: libsort.so main benchmark
+
+libsort.so: sortlib.c sortlib.h
+	gcc -shared -fPIC -Wl,-soname,libsort.so -o libsort.so sortlib.c
+
+main: main.c bitstruct.c sortlib.h bitstruct.h
+	gcc -o main main.c bitstruct.c -L. -lsort
+
+benchmark: benchmark.c sortlib.h
+	gcc -o benchmark benchmark.c -L. -lsort -lm
+
+run: main
+	LD_LIBRARY_PATH=. ./main
+
+demo: main
+	@echo "=== Insertion Sort — случайные int ==="
+	LD_LIBRARY_PATH=. ./main -a insertion -n 12 -t int -o random
+	@echo ""
+	@echo "=== Heap Sort — случайные int ==="
+	LD_LIBRARY_PATH=. ./main -a heap -n 12 -t int -o random
+	@echo ""
+	@echo "=== Insertion Sort — атомы (по Z) ==="
+	LD_LIBRARY_PATH=. ./main -a insertion -n 8 -t atom
+
+plots: benchmark
+	mkdir -p data plots
+	LD_LIBRARY_PATH=. ./benchmark
+	gnuplot plot.gp
+
+clean:
+	rm -f libsort.so main benchmark
+	rm -rf data plots
