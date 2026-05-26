@@ -7,7 +7,7 @@ main: main.c bitstruct.c sortlib.h bitstruct.h
 	gcc-15 -o main main.c bitstruct.c -L. -lsort
 
 benchmark: benchmark.c sortlib.h
-	gcc-15 -o benchmark benchmark.c -L. -lsort
+	gcc-15 -o benchmark benchmark.c -L. -lsort -lm
 
 run: main
 	DYLD_LIBRARY_PATH=. ./main
