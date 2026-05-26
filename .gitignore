@@ -1,0 +1,7 @@
+libsort.dylib
+main
+benchmark
+data/
+plots/
+*.o
+*.dSYM
