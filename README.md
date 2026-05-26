@@ -1,214 +1,95 @@
 # RGR — Динамическая библиотека сортировок
 
-**Ахмедов Бахтовар Боирович · вариант 2**
-Сортировка вставками + пирамидальная сортировка · динамическая библиотека macOS
-
----
-
-## Структура проекта
-
-```
-rgr/
-├── sortlib.h / sortlib.c   — динамическая библиотека (libsort.dylib)
-├── bitstruct.h / bitstruct.c — пользовательская структура atom (пример generic-сортировки)
-├── main.c                  — демо-программа (getopt)
-├── benchmark.c             — замеры производительности
-├── plot.gp                 — gnuplot-скрипт (8 графиков)
-├── Makefile
-├── RESULTS.md              — анализ результатов
-└── README.md
-```
+**Ахмедов Бахтовар Боирович · вариант 2**  
+Сортировка вставками + пирамидальная сортировка · macOS `.dylib`
 
 ---
 
 ## Сборка и запуск
 
 ```bash
-make          # собрать всё: libsort.dylib, main, benchmark
-make run      # запустить демо (DYLD_LIBRARY_PATH=.)
-make plots    # бенчмарк + графики → plots/*.png
-make clean    # удалить собранные файлы
+make              # libsort.dylib + main + benchmark
+make demo         # показательный прогон: оба алгоритма, int + atom
+make sort N=7     # ввести 7 своих чисел с клавиатуры (ALG=heap по умолчанию)
+make sort N=5 ALG=insertion < nums.txt   # из файла
+make plots        # бенчмарк → data/*.dat → plots/*.png
+make clean
 ```
 
 ---
 
-## Описание кода
-
-### `sortlib.h` / `sortlib.c` — динамическая библиотека
-
-Реализует два алгоритма с **обобщённым интерфейсом** (аналогично `qsort` из стандартной библиотеки):
+## Интерфейс библиотеки
 
 ```c
 void insertionSort(void *base, size_t nmemb, size_t size,
                    int (*compar)(const void *, const void *));
-
-void heapSort(void *base, size_t nmemb, size_t size,
-              int (*compar)(const void *, const void *));
+void heapSort     (void *base, size_t nmemb, size_t size,
+                   int (*compar)(const void *, const void *));
 ```
 
-Параметры:
-- `base` — указатель на начало массива
-- `nmemb` — количество элементов
-- `size` — размер одного элемента в байтах (`sizeof(int)`, `sizeof(atom)`, …)
-- `compar` — функция-компаратор, возвращает <0 / 0 / >0
-
-Благодаря `void*` и компаратору библиотека сортирует **любые типы данных** — в том числе пользовательские структуры (см. пример с `atom`).
-
-**Ключевые детали реализации:**
-
-`insertionSort` — один `malloc(size)` на всю сортировку (буфер для текущего ключа), сдвиг через `memcpy`.
-
-`heapSort` — итеративный `siftDown` (не рекурсивный — нет риска переполнения стека), один `malloc(size)` на весь прогон (буфер для обмена).
-
-Динамическая библиотека компилируется с флагом `-install_name @executable_path/libsort.dylib`, поэтому `./main` находит её без выставления `DYLD_LIBRARY_PATH`. Переменная окружения по-прежнему работает при запуске вручную:
-
-```bash
-DYLD_LIBRARY_PATH=. ./main
-```
+Аналог `qsort` — сортирует любой тип данных через компаратор.  
+`insertionSort`: буфер-ключ `malloc(size)`, сдвиг через `memcpy`.  
+`heapSort`: итеративный `siftDown`, буфер-своп `malloc(size)`.
 
 ---
 
-### `main.c` — демо-программа
+## Демо-программа (getopt)
 
-Использует стандартную функцию `getopt(3)` для разбора аргументов командной строки.
+```bash
+./main [-a insertion|heap] [-n N] [-t int|atom] [-o random|sorted|reverse|stdin]
+```
 
-**Строка опций** `"a:n:t:o:h"`:
-- буква без двоеточия (`h`) — флаг без аргумента;
-- буква с двоеточием (`a:`, `n:`, `t:`, `o:`) — опция, за которой идёт обязательный аргумент, доступный через `optarg`.
+| Флаг | По умолчанию |
+|---|---|
+| `-a insertion\|heap` | `insertion` |
+| `-n N` | `10` |
+| `-t int\|atom` | `int` |
+| `-o random\|sorted\|reverse\|stdin` | `random` |
 
-**Цикл разбора:**
+Строка опций `"a:n:t:o:h"`: буква с `:` требует аргумент (`optarg`), без `:` — флаг.  
+`getopt` возвращает `-1` в конце, `'?'` при неизвестном флаге.
 
 ```c
-int opt;
 while ((opt = getopt(argc, argv, "a:n:t:o:h")) != -1) {
     switch (opt) {
-        case 'a': alg   = optarg;      break;   // "insertion" или "heap"
-        case 'n': n     = atoi(optarg); break;   // размер массива
-        case 't': type  = optarg;      break;   // "int" или "atom"
-        case 'o': order = optarg;      break;   // "random" / "sorted" / "reverse"
+        case 'a': alg   = optarg;       break;
+        case 'n': n     = atoi(optarg); break;
+        case 't': type  = optarg;       break;
+        case 'o': order = optarg;       break;
         default:  printUsage(argv[0]); return opt == 'h' ? 0 : 1;
     }
 }
 ```
 
-`getopt` возвращает код символа при успехе и `-1` в конце списка аргументов.  
-Неизвестный флаг печатает диагностику в `stderr` и передаётся в `default` как `'?'`.
-
-| Флаг | Значение | По умолчанию |
-|---|---|---|
-| `-a insertion\|heap` | алгоритм | `insertion` |
-| `-n N` | размер массива | `10` |
-| `-t int\|atom` | тип данных | `int` |
-| `-o random\|sorted\|reverse` | начальный порядок | `random` |
-| `-h` | справка | — |
-
-Примеры:
-
-```bash
-./main -a heap -n 20 -t int -o random
-./main -a insertion -n 8 -t atom          # сортировка атомов по порядковому номеру Z
-./main -h
-```
-
-Сортировка структуры `atom` демонстрирует, что библиотека работает с произвольными типами: передаётся компаратор `compareAtomsByZ`, сортировка идёт по полю Z, упакованному в битовое поле `uint16_t`.
-
 ---
 
-### `benchmark.c` — замеры производительности
+## Структура `atom`
 
-- Диапазон: n = 5 000 … 50 000, шаг 5 000 (10 точек)
-- 3 типа входных данных: случайные, возрастание, убывание
-- Каждая точка: 1 прогон разогрева + 3 измерения, среднее
-- Таймер: `clock_gettime(CLOCK_MONOTONIC)` (наносекундная точность)
-- Если время одного прогона превышает 900 с — измерения для данного алгоритма прекращаются
-- После замеров автоматически генерирует **идеальные кривые** (`.dat`-файлы), откалиброванные по точке n = 50 000
-
-Выходные файлы (`data/`):
+16-битная упаковка химического элемента:
 
 ```
-insertion_random.dat   heap_random.dat
-insertion_sorted.dat   heap_sorted.dat
-insertion_reverse.dat  heap_reverse.dat
-ideal_insertion_*.dat  ideal_heap_*.dat
-```
-
----
-
-### `bitstruct.h` / `bitstruct.c` — структура `atom`
-
-Упакованная структура химического элемента таблицы Менделеева в 16 битах:
-
-```
-бит 15–9  порядковый номер Z (7 бит, 1–118)
-бит 8–6   группа (3 бита, 1–8)
-бит 5–3   период (3 бита, 1–7)
-бит 2     металл/неметалл (1 бит)
+бит 15–9  Z (7 бит, 1–118)
+бит 8–6   группа (3 бита)
+бит 5–3   период (3 бита)
+бит 2     металл/неметалл
 бит 1–0   зарезервировано
 ```
 
-Используется для демонстрации generic-сортировки: массив структур `atom` сортируется по Z через `compareAtomsByZ`.
+---
+
+## Бенчмарк
+
+- n = 5 000 … 50 000, шаг 5 000 · 3 типа входных данных · warmup + 3 прогона
+- Таймер: `clock_gettime(CLOCK_MONOTONIC)`
+- Генерирует 12 `.dat`-файлов: измеренные + идеальные кривые (O(n²) / O(n log n) / O(n))
 
 ---
 
-## Описание Makefile
-
-```makefile
-all: libsort.dylib main benchmark
-```
-Цель по умолчанию — собирает все три артефакта.
-
-```makefile
-libsort.dylib: sortlib.c sortlib.h
-    gcc-15 -dynamiclib -install_name @executable_path/libsort.dylib -o libsort.dylib sortlib.c
-```
-`-dynamiclib` — создаёт `.dylib` (macOS-аналог `.so`).  
-`-install_name @executable_path/libsort.dylib` — прописывает путь к библиотеке относительно исполняемого файла, чтобы не нужен был `DYLD_LIBRARY_PATH`.
-
-```makefile
-main: main.c bitstruct.c sortlib.h bitstruct.h
-    gcc-15 -o main main.c bitstruct.c -L. -lsort
-```
-`-L.` — искать библиотеки в текущей директории.  
-`-lsort` — линковать с `libsort.dylib`.
-
-```makefile
-benchmark: benchmark.c sortlib.h
-    gcc-15 -o benchmark benchmark.c -L. -lsort -lm
-```
-`-lm` — математическая библиотека (нужна для `log2()` при генерации идеальных кривых).
-
-```makefile
-run: main
-    DYLD_LIBRARY_PATH=. ./main
-```
-Явно выставляет путь к динамической библиотеке через переменную окружения.
-
-```makefile
-plots: benchmark
-    mkdir -p data plots
-    DYLD_LIBRARY_PATH=. ./benchmark
-    gnuplot plot.gp
-```
-Запускает бенчмарк, затем строит все графики.
-
-```makefile
-clean:
-    rm -f libsort.dylib main benchmark
-    rm -rf data plots
-```
-Удаляет все сгенерированные файлы, оставляя только исходники.
-
----
-
-## Графики
+## Графики (`plots/`)
 
 | Файл | Содержимое |
 |---|---|
-| `plots/random.png` | Оба алгоритма, случайные данные |
-| `plots/sorted.png` | Оба алгоритма, возрастание |
-| `plots/reverse.png` | Оба алгоритма, убывание |
-| `plots/insertion.png` | Insertion Sort — все три типа (log Y) |
-| `plots/heap.png` | Heap Sort — все три типа |
-| `plots/random_i.png` | Идеальные кривые O(n²) vs O(n log n), случайные |
-| `plots/sorted_i.png` | Идеальные кривые O(n) vs O(n log n), возрастание |
-| `plots/reverse_i.png` | Идеальные кривые O(n²) vs O(n log n), убывание |
+| `random.png` / `sorted.png` / `reverse.png` | Оба алгоритма по типу входа |
+| `insertion.png` | Insertion: все три типа, log Y |
+| `heap.png` | Heap: все три типа |
+| `random_i.png` / `sorted_i.png` / `reverse_i.png` | Идеальные кривые |
