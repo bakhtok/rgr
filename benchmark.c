@@ -13,11 +13,12 @@
 #include <sys/stat.h>
 #include "sortlib.h"
 
+#define N_START   5000
+#define N_STEP    5000
+#define N_END    50000
+#define N_COUNT  ((N_END - N_START) / N_STEP + 1)
+#define RUNS      3
 #define MAX_SECONDS 900.0
-#define RUNS        10
-#define P_MIN        8
-#define P_MAX       15
-#define P_COUNT     (P_MAX - P_MIN + 1)
 
 static int compareInts(const void *a, const void *b) {
     return *(const int *)a - *(const int *)b;
@@ -25,7 +26,6 @@ static int compareInts(const void *a, const void *b) {
 
 static double measure(void (*fn)(void *, size_t, size_t, int (*)(const void *, const void *)),
                       int *src, size_t n) {
-    // Warmup
     int *tmp = malloc(n * sizeof(int));
     memcpy(tmp, src, n * sizeof(int));
     fn(tmp, n, sizeof(int), compareInts);
@@ -47,22 +47,21 @@ static double measure(void (*fn)(void *, size_t, size_t, int (*)(const void *, c
     return total / RUNS;
 }
 
-static void writeIdeal(const char *path, double *times,
-                       double (*theory)(double)) {
-    int calP = -1;
+static void writeIdeal(const char *path, double *times, double (*theory)(double)) {
+    int calIdx = -1;
     double tCal = 0.0;
-    for (int i = P_COUNT - 1; i >= 0; i--) {
-        if (times[i] > 0.0) { calP = P_MIN + i; tCal = times[i]; break; }
+    for (int i = N_COUNT - 1; i >= 0; i--) {
+        if (times[i] > 0.0) { calIdx = i; tCal = times[i]; break; }
     }
-    if (calP < 0) return;
+    if (calIdx < 0) return;
 
-    double nCal = (double)((size_t)1 << calP);
+    double nCal = (double)(N_START + calIdx * N_STEP);
     double C = tCal / theory(nCal);
 
     FILE *f = fopen(path, "w");
     if (!f) return;
-    for (int p = P_MIN; p <= P_MAX; p++) {
-        double n = (double)((size_t)1 << p);
+    for (int i = 0; i < N_COUNT; i++) {
+        double n = (double)(N_START + i * N_STEP);
         fprintf(f, "%.0f %.9f\n", n, C * theory(n));
     }
     fclose(f);
@@ -86,16 +85,15 @@ int main(void) {
     int stopIns[3]  = {0, 0, 0};
     int stopHeap[3] = {0, 0, 0};
 
-    double tInsRand[P_COUNT]  = {0};
-    double tHeapRand[P_COUNT] = {0};
-    double tInsSort[P_COUNT]  = {0};
-    double tHeapSort[P_COUNT] = {0};
-    double tInsRev[P_COUNT]   = {0};
-    double tHeapRev[P_COUNT]  = {0};
+    double tInsRand[N_COUNT]  = {0};
+    double tHeapRand[N_COUNT] = {0};
+    double tInsSort[N_COUNT]  = {0};
+    double tHeapSort[N_COUNT] = {0};
+    double tInsRev[N_COUNT]   = {0};
+    double tHeapRev[N_COUNT]  = {0};
 
-    for (int p = P_MIN; p <= P_MAX; p++) {
-        size_t n = (size_t)1 << p;
-        int idx = p - P_MIN;
+    for (int i = 0; i < N_COUNT; i++) {
+        size_t n = (size_t)(N_START + i * N_STEP);
         printf("n = %zu\n", n);
         fflush(stdout);
 
@@ -104,16 +102,16 @@ int main(void) {
         int *rev = malloc(n * sizeof(int));
 
         srand(12345);
-        for (size_t i = 0; i < n; i++) {
-            rnd[i] = rand();
-            srt[i] = (int)i;
-            rev[i] = (int)(n - 1 - i);
+        for (size_t k = 0; k < n; k++) {
+            rnd[k] = rand();
+            srt[k] = (int)k;
+            rev[k] = (int)(n - 1 - k);
         }
 
 #define MRUN(stop, fn, src, file, arr) \
         if (!stop) { \
             double t = measure(fn, src, n); \
-            arr[idx] = t; \
+            arr[i] = t; \
             fprintf(file, "%zu %.9f\n", n, t); \
             fflush(file); \
             if (t > MAX_SECONDS) stop = 1; \
