@@ -5,3 +5,4 @@ data/
 plots/
 *.o
 *.dSYM
+.claude/
