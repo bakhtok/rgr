@@ -1,75 +1,57 @@
 set terminal png size 1200,800
 set grid
 set xlabel "Array size (elements)"
-set ylabel "Time (seconds)"
 set key top left
 set xrange [0:55000]
 set xtics 10000
+set yrange [0:*]
 
-# --- per-input comparison (linear Y, обе кривые в своём масштабе) ---
+# --- Swaps ---
 
-set output "plots/random.png"
-set title "Random data"
+set ylabel "Swaps"
+
+set output "plots/swaps_random.png"
+set title "Swaps — Random data"
 plot "data/insertion_random.dat" using 1:2 smooth csplines with lines lw 2.5 lc 1 title "Insertion Sort", \
      "data/insertion_random.dat" using 1:2 with points pt 7 ps 1.2 lc 1 notitle, \
      "data/heap_random.dat"      using 1:2 smooth csplines with lines lw 2.5 lc 2 title "Heap Sort", \
      "data/heap_random.dat"      using 1:2 with points pt 5 ps 1.2 lc 2 notitle
 
-set output "plots/sorted.png"
-set title "Sorted data (ascending)"
+set output "plots/swaps_sorted.png"
+set title "Swaps — Sorted data (ascending)"
 plot "data/insertion_sorted.dat" using 1:2 smooth csplines with lines lw 2.5 lc 1 title "Insertion Sort", \
      "data/insertion_sorted.dat" using 1:2 with points pt 7 ps 1.2 lc 1 notitle, \
      "data/heap_sorted.dat"      using 1:2 smooth csplines with lines lw 2.5 lc 2 title "Heap Sort", \
      "data/heap_sorted.dat"      using 1:2 with points pt 5 ps 1.2 lc 2 notitle
 
-set output "plots/reverse.png"
-set title "Sorted data (descending)"
+set output "plots/swaps_reverse.png"
+set title "Swaps — Sorted data (descending)"
 plot "data/insertion_reverse.dat" using 1:2 smooth csplines with lines lw 2.5 lc 1 title "Insertion Sort", \
      "data/insertion_reverse.dat" using 1:2 with points pt 7 ps 1.2 lc 1 notitle, \
      "data/heap_reverse.dat"      using 1:2 smooth csplines with lines lw 2.5 lc 2 title "Heap Sort", \
      "data/heap_reverse.dat"      using 1:2 with points pt 5 ps 1.2 lc 2 notitle
 
-# --- per-algorithm (каждый алгоритм — все три типа входных данных) ---
+# --- Comparisons ---
 
-set logscale y
-set output "plots/insertion.png"
-set title "Insertion Sort — все типы входных данных (log Y)"
-plot "data/insertion_random.dat"  using 1:2 smooth csplines with lines lw 2.5 lc 1 title "Random (O(n^2))", \
-     "data/insertion_random.dat"  using 1:2 with points pt 7 ps 1.2 lc 1 notitle, \
-     "data/insertion_reverse.dat" using 1:2 smooth csplines with lines lw 2.5 lc 3 title "Reverse (O(n^2))", \
-     "data/insertion_reverse.dat" using 1:2 with points pt 9 ps 1.2 lc 3 notitle, \
-     "data/insertion_sorted.dat"  using 1:2 smooth csplines with lines lw 2.5 lc 2 title "Sorted  (O(n))", \
-     "data/insertion_sorted.dat"  using 1:2 with points pt 5 ps 1.2 lc 2 notitle
+set ylabel "Comparisons"
 
-unset logscale y
-set output "plots/heap.png"
-set title "Heap Sort — все типы входных данных"
-plot "data/heap_random.dat"  using 1:2 smooth csplines with lines lw 2.5 lc 1 title "Random", \
-     "data/heap_random.dat"  using 1:2 with points pt 7 ps 1.2 lc 1 notitle, \
-     "data/heap_reverse.dat" using 1:2 smooth csplines with lines lw 2.5 lc 3 title "Reverse", \
-     "data/heap_reverse.dat" using 1:2 with points pt 9 ps 1.2 lc 3 notitle, \
-     "data/heap_sorted.dat"  using 1:2 smooth csplines with lines lw 2.5 lc 2 title "Sorted", \
-     "data/heap_sorted.dat"  using 1:2 with points pt 5 ps 1.2 lc 2 notitle
+set output "plots/iters_random.png"
+set title "Comparisons — Random data"
+plot "data/insertion_random.dat" using 1:3 smooth csplines with lines lw 2.5 lc 1 title "Insertion Sort", \
+     "data/insertion_random.dat" using 1:3 with points pt 7 ps 1.2 lc 1 notitle, \
+     "data/heap_random.dat"      using 1:3 smooth csplines with lines lw 2.5 lc 2 title "Heap Sort", \
+     "data/heap_random.dat"      using 1:3 with points pt 5 ps 1.2 lc 2 notitle
 
-# --- ideal ---
+set output "plots/iters_sorted.png"
+set title "Comparisons — Sorted data (ascending)"
+plot "data/insertion_sorted.dat" using 1:3 smooth csplines with lines lw 2.5 lc 1 title "Insertion Sort", \
+     "data/insertion_sorted.dat" using 1:3 with points pt 7 ps 1.2 lc 1 notitle, \
+     "data/heap_sorted.dat"      using 1:3 smooth csplines with lines lw 2.5 lc 2 title "Heap Sort", \
+     "data/heap_sorted.dat"      using 1:3 with points pt 5 ps 1.2 lc 2 notitle
 
-set output "plots/random_i.png"
-set title "Random data — ideal complexity"
-plot "data/ideal_insertion_random.dat" using 1:2 smooth csplines with lines lw 2.5 lc 1 title "O(n^2)", \
-     "data/ideal_insertion_random.dat" using 1:2 with points pt 7 ps 1.2 lc 1 notitle, \
-     "data/ideal_heap_random.dat"      using 1:2 smooth csplines with lines lw 2.5 lc 2 title "O(n log n)", \
-     "data/ideal_heap_random.dat"      using 1:2 with points pt 5 ps 1.2 lc 2 notitle
-
-set output "plots/sorted_i.png"
-set title "Sorted data (ascending) — ideal complexity"
-plot "data/ideal_insertion_sorted.dat" using 1:2 smooth csplines with lines lw 2.5 lc 1 title "O(n)", \
-     "data/ideal_insertion_sorted.dat" using 1:2 with points pt 7 ps 1.2 lc 1 notitle, \
-     "data/ideal_heap_sorted.dat"      using 1:2 smooth csplines with lines lw 2.5 lc 2 title "O(n log n)", \
-     "data/ideal_heap_sorted.dat"      using 1:2 with points pt 5 ps 1.2 lc 2 notitle
-
-set output "plots/reverse_i.png"
-set title "Sorted data (descending) — ideal complexity"
-plot "data/ideal_insertion_reverse.dat" using 1:2 smooth csplines with lines lw 2.5 lc 1 title "O(n^2)", \
-     "data/ideal_insertion_reverse.dat" using 1:2 with points pt 7 ps 1.2 lc 1 notitle, \
-     "data/ideal_heap_reverse.dat"      using 1:2 smooth csplines with lines lw 2.5 lc 2 title "O(n log n)", \
-     "data/ideal_heap_reverse.dat"      using 1:2 with points pt 5 ps 1.2 lc 2 notitle
+set output "plots/iters_reverse.png"
+set title "Comparisons — Sorted data (descending)"
+plot "data/insertion_reverse.dat" using 1:3 smooth csplines with lines lw 2.5 lc 1 title "Insertion Sort", \
+     "data/insertion_reverse.dat" using 1:3 with points pt 7 ps 1.2 lc 1 notitle, \
+     "data/heap_reverse.dat"      using 1:3 smooth csplines with lines lw 2.5 lc 2 title "Heap Sort", \
+     "data/heap_reverse.dat"      using 1:3 with points pt 5 ps 1.2 lc 2 notitle
