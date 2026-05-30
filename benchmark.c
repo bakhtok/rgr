@@ -43,6 +43,9 @@ int main(void) {
     FILE *fInsRev   = fopen("data/insertion_reverse.dat", "w");
     FILE *fHeapRev  = fopen("data/heap_reverse.dat",      "w");
 
+    FILE *all[] = { fInsRand, fHeapRand, fInsSort, fHeapSort, fInsRev, fHeapRev };
+    for (int f = 0; f < 6; f++) fprintf(all[f], "0 0 0\n");
+
     for (int i = 0; i < N_COUNT; i++) {
         size_t n = (size_t)(N_START + i * N_STEP);
         printf("n = %zu\n", n);
