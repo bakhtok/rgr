@@ -10,13 +10,15 @@ set yrange [0:*]
 
 set ylabel "Swaps"
 
+set logscale y
 set output "plots/swaps_random.png"
-set title "Swaps — Random data"
+set title "Swaps — Random data (log Y)"
 plot "data/insertion_random.dat" using 1:2 smooth csplines with lines lw 2.5 lc 1 title "Insertion Sort", \
      "data/insertion_random.dat" using 1:2 with points pt 7 ps 1.2 lc 1 notitle, \
      "data/heap_random.dat"      using 1:2 smooth csplines with lines lw 2.5 lc 2 title "Heap Sort", \
      "data/heap_random.dat"      using 1:2 with points pt 5 ps 1.2 lc 2 notitle
 
+unset logscale y
 set output "plots/swaps_sorted.png"
 set title "Swaps — Sorted data (ascending)"
 plot "data/insertion_sorted.dat" using 1:2 smooth csplines with lines lw 2.5 lc 1 title "Insertion Sort", \
@@ -24,8 +26,9 @@ plot "data/insertion_sorted.dat" using 1:2 smooth csplines with lines lw 2.5 lc 
      "data/heap_sorted.dat"      using 1:2 smooth csplines with lines lw 2.5 lc 2 title "Heap Sort", \
      "data/heap_sorted.dat"      using 1:2 with points pt 5 ps 1.2 lc 2 notitle
 
+set logscale y
 set output "plots/swaps_reverse.png"
-set title "Swaps — Sorted data (descending)"
+set title "Swaps — Sorted data (descending, log Y)"
 plot "data/insertion_reverse.dat" using 1:2 smooth csplines with lines lw 2.5 lc 1 title "Insertion Sort", \
      "data/insertion_reverse.dat" using 1:2 with points pt 7 ps 1.2 lc 1 notitle, \
      "data/heap_reverse.dat"      using 1:2 smooth csplines with lines lw 2.5 lc 2 title "Heap Sort", \
@@ -36,12 +39,13 @@ plot "data/insertion_reverse.dat" using 1:2 smooth csplines with lines lw 2.5 lc
 set ylabel "Comparisons"
 
 set output "plots/iters_random.png"
-set title "Comparisons — Random data"
+set title "Comparisons — Random data (log Y)"
 plot "data/insertion_random.dat" using 1:3 smooth csplines with lines lw 2.5 lc 1 title "Insertion Sort", \
      "data/insertion_random.dat" using 1:3 with points pt 7 ps 1.2 lc 1 notitle, \
      "data/heap_random.dat"      using 1:3 smooth csplines with lines lw 2.5 lc 2 title "Heap Sort", \
      "data/heap_random.dat"      using 1:3 with points pt 5 ps 1.2 lc 2 notitle
 
+unset logscale y
 set output "plots/iters_sorted.png"
 set title "Comparisons — Sorted data (ascending)"
 plot "data/insertion_sorted.dat" using 1:3 smooth csplines with lines lw 2.5 lc 1 title "Insertion Sort", \
@@ -49,8 +53,9 @@ plot "data/insertion_sorted.dat" using 1:3 smooth csplines with lines lw 2.5 lc 
      "data/heap_sorted.dat"      using 1:3 smooth csplines with lines lw 2.5 lc 2 title "Heap Sort", \
      "data/heap_sorted.dat"      using 1:3 with points pt 5 ps 1.2 lc 2 notitle
 
+set logscale y
 set output "plots/iters_reverse.png"
-set title "Comparisons — Sorted data (descending)"
+set title "Comparisons — Sorted data (descending, log Y)"
 plot "data/insertion_reverse.dat" using 1:3 smooth csplines with lines lw 2.5 lc 1 title "Insertion Sort", \
      "data/insertion_reverse.dat" using 1:3 with points pt 7 ps 1.2 lc 1 notitle, \
      "data/heap_reverse.dat"      using 1:3 smooth csplines with lines lw 2.5 lc 2 title "Heap Sort", \
