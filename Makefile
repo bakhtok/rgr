@@ -30,13 +30,13 @@ run: main
 	$(RUN) ./main
 
 demo: main
-	@echo "=== Insertion Sort — случайные int ==="
+	@echo "=== Insertion Sort: random int ==="
 	$(RUN) ./main -a insertion -n 12 -t int -o random
 	@echo ""
-	@echo "=== Heap Sort — случайные int ==="
+	@echo "=== Heap Sort: random int ==="
 	$(RUN) ./main -a heap -n 12 -t int -o random
 	@echo ""
-	@echo "=== Insertion Sort — атомы (по Z) ==="
+	@echo "=== Insertion Sort: atoms ==="
 	$(RUN) ./main -a insertion -n 8 -t atom
 
 sort: main

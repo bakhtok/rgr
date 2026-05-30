@@ -1,10 +1,3 @@
-//
-//  sortlib.c
-//  rgr
-//
-//  Created by Bakhtovar Akhmedov on 26.05.2026.
-//
-
 #include "sortlib.h"
 #include <string.h>
 #include <stdlib.h>

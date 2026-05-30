@@ -1,20 +1,13 @@
-//
-//  benchmark.c
-//  rgr
-//
-//  Created by Bakhtovar Akhmedov on 26.05.2026.
-//
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
 #include "sortlib.h"
 
-#define N_START   5000
-#define N_STEP    5000
-#define N_END    50000
-#define N_COUNT  ((N_END - N_START) / N_STEP + 1)
+#define N_START  5000
+#define N_STEP   5000
+#define N_END   50000
+#define N_COUNT ((N_END - N_START) / N_STEP + 1)
 
 static int compareInts(const void *a, const void *b) {
     return *(const int *)a - *(const int *)b;
@@ -24,10 +17,10 @@ static void measure(void (*fn)(void *, size_t, size_t, int (*)(const void *, con
                     int *src, size_t n, size_t *swaps, size_t *comparisons) {
     int *arr = malloc(n * sizeof(int));
     memcpy(arr, src, n * sizeof(int));
-    g_swaps       = 0;
+    g_swaps = 0;
     g_comparisons = 0;
     fn(arr, n, sizeof(int), compareInts);
-    *swaps       = g_swaps;
+    *swaps = g_swaps;
     *comparisons = g_comparisons;
     free(arr);
 }

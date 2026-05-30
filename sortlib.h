@@ -1,10 +1,3 @@
-//
-//  sortlib.h
-//  rgr
-//
-//  Created by Bakhtovar Akhmedov on 26.05.2026.
-//
-
 #ifndef sortlib_h
 #define sortlib_h
 
